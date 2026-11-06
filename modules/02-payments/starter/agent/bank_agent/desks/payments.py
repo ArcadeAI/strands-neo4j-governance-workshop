@@ -34,7 +34,7 @@ RELEASE_TOOLS = ("ReleasePayment", "RequestApproval")
 HOLD_TOOLS = ("HoldPayment",)
 
 SCREEN_PROMPT = """
-You screen payment exceptions at Larkspur Bank. Read the payment with Bank_GetPayment, screen the
+You screen payment exceptions at Bowser Capital. Read the payment with Bank_GetPayment, screen the
 beneficiary's name with Bank_ScreenParty, and decide. End your answer with one line, exactly
 `VERDICT: RELEASE` or `VERDICT: HOLD`, followed by a one-sentence reason. Hold on any sanctions
 list or PEP match, or anything you cannot explain. If no payment ID is given, list the

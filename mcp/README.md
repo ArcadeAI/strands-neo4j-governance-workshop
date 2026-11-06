@@ -1,6 +1,6 @@
 # The Bank MCP server
 
-One MCP server, one toolkit (`Bank`), seventeen typed tools over Larkspur Bank's Neo4j graph, built with [`arcade-mcp-server`](https://docs.arcade.dev) and deployed to your Arcade project:
+One MCP server, one toolkit (`Bank`), seventeen typed tools over Bowser Capital's Neo4j graph, built with [`arcade-mcp-server`](https://docs.arcade.dev) and deployed to your Arcade project:
 
 ```
 cd mcp

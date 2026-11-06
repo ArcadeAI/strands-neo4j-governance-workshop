@@ -1,4 +1,4 @@
-"""The Bank MCP server: one toolkit, `Bank`, over Larkspur Bank's Neo4j graph.
+"""The Bank MCP server: one toolkit, `Bank`, over Bowser Capital's Neo4j graph.
 
 Importing the package registers every tool on `app`, so `server.py` has them all before
 `app.run()`.

@@ -14,7 +14,7 @@ app = MCPApp(
     name="bank",
     version="1.0.0",
     instructions=(
-        "Larkspur Bank's desks over one Neo4j graph of customers, accounts, transfers, cases and deals. "
+        "Bowser Capital's desks over one Neo4j graph of customers, accounts, transfers, cases and deals. "
         "Payments: list_payment_exceptions, get_payment, screen_party, release_payment, hold_payment. "
         "AML: get_case, trace_funds, trace_ownership, freeze_account, file_sar. "
         "Corporate banking: search_companies, get_company_profile, list_deals, get_deal. "

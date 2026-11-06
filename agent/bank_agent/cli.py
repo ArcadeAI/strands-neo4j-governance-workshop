@@ -73,7 +73,7 @@ def build(settings: Settings, *, confirm: bool = False, session: str | None = No
 
 
 def ask(argv: list[str] | None = None) -> None:
-    parser = argparse.ArgumentParser(prog="ask", description="Ask Larkspur Bank's assistant, or hand a task to a desk.")
+    parser = argparse.ArgumentParser(prog="ask", description="Ask Bowser Capital's assistant, or hand a task to a desk.")
     parser.add_argument("prompt", nargs="+")
     parser.add_argument("--desk", choices=DESKS, default="assistant", help="which desk takes the task (default: the assistant)")
     parser.add_argument("--as", dest="user", help="the employee the agents work for (default: BANK_USER, or the desk's usual employee)")

@@ -1,4 +1,4 @@
-# The Larkspur Bank agents
+# The Bowser Capital agents
 
 [Strands Agents](https://strandsagents.com) agents (`bank_agent`) whose every tool that touches the bank, or leaves it, runs through Arcade: a module 01 assistant and three desks.
 

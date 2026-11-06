@@ -84,7 +84,7 @@ async def request_approval(
     action_name = action.value
     book = book_for(context)
     if await book.employee(requester) is None:
-        raise ToolExecutionError(f"{requester} is not a Larkspur employee, so there is nobody to ask on behalf of.")
+        raise ToolExecutionError(f"{requester} is not a Bowser Capital employee, so there is nobody to ask on behalf of.")
 
     subject = None
     if action_name in CASE_ACTIONS:

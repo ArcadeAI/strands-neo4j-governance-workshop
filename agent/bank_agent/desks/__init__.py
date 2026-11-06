@@ -1,4 +1,4 @@
-"""Larkspur Bank's desks, each a different Strands multi-agent pattern over the same governed tools.
+"""Bowser Capital's desks, each a different Strands multi-agent pattern over the same governed tools.
 
 - payments: a Graph with conditional edges (screen, then release or hold)
 - aml: a Graph whose first node is a Swarm of investigators, and a lead who acts, with interrupts

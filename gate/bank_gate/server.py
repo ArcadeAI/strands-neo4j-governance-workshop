@@ -1,4 +1,4 @@
-"""The gate: Larkspur Bank's control plane, served for Arcade to call.
+"""The gate: Bowser Capital's control plane, served for Arcade to call.
 
     uv run gate                 # serves http://127.0.0.1:8742, policies from gate/policies/
 
@@ -35,7 +35,7 @@ def create_app(policy: Policy, directory: Directory, token: str, audit: AuditLog
     if not token:
         raise ValueError("the gate needs a bearer token; set GATE_TOKEN")
     hooks = Hooks(policy, directory, audit or AuditLog())
-    app = FastAPI(title="Larkspur Bank control plane", docs_url=None, redoc_url=None)
+    app = FastAPI(title="Bowser Capital control plane", docs_url=None, redoc_url=None)
     app.state.hooks = hooks
 
     def bearer(authorization: str | None = Header(default=None)) -> None:
@@ -103,7 +103,7 @@ def main(argv: list[str] | None = None) -> None:
     from bank_gate.directory import Neo4jDirectory
 
     load_dotenv(find_dotenv(usecwd=True))
-    parser = argparse.ArgumentParser(prog="gate", description="Serve Larkspur Bank's contextual access hooks.")
+    parser = argparse.ArgumentParser(prog="gate", description="Serve Bowser Capital's contextual access hooks.")
     parser.add_argument("--port", type=int, default=int(os.environ.get("GATE_PORT", DEFAULT_PORT)))
     parser.add_argument("--host", default=os.environ.get("GATE_HOST", "127.0.0.1"))
     parser.add_argument("--policy", default=os.environ.get("GATE_POLICY", str(DEFAULT_POLICY)))

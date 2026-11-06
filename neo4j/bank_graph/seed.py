@@ -1,4 +1,4 @@
-"""Load Larkspur Bank's graph into Neo4j, print it as Cypher, and look at the staff in it.
+"""Load Bowser Capital's graph into Neo4j, print it as Cypher, and look at the staff in it.
 
     uv run seed              # load seed.json into the database NEO4J_URI names
     uv run seed --reset      # delete the workshop's nodes first, then load
@@ -181,7 +181,7 @@ def cypher_literal(value: Any) -> str:
 def to_cypher_script(seed: dict[str, Any]) -> str:
     """The whole graph as a script you can paste into Neo4j Browser or the Aura query editor."""
     parts = [
-        "// Larkspur Bank's graph. Generated from neo4j/bank_graph/seed.json by `uv run seed --print`.",
+        "// Bowser Capital's graph. Generated from neo4j/bank_graph/seed.json by `uv run seed --print`.",
         "// Paste it into Neo4j Browser or the Aura query editor; it is safe to run twice.",
     ]
     parts += [f"{c};" for c in CONSTRAINTS]
@@ -220,7 +220,7 @@ def load(driver, seed: dict[str, Any], *, reset: bool = False) -> None:
 
 
 def main(argv: list[str] | None = None) -> None:
-    parser = argparse.ArgumentParser(prog="seed", description="Load Larkspur Bank's graph into Neo4j.")
+    parser = argparse.ArgumentParser(prog="seed", description="Load Bowser Capital's graph into Neo4j.")
     parser.add_argument("--reset", action="store_true", help="delete the workshop's nodes first")
     parser.add_argument("--print", dest="print_only", action="store_true", help="print the graph as Cypher and exit")
     args = parser.parse_args(argv)
@@ -232,7 +232,7 @@ def main(argv: list[str] | None = None) -> None:
         driver.verify_connectivity()
         load(driver, seed, reset=args.reset)
     print(
-        f"Loaded Larkspur Bank: {len(seed['employees'])} employees, {len(seed['accounts'])} accounts, "
+        f"Loaded Bowser Capital: {len(seed['employees'])} employees, {len(seed['accounts'])} accounts, "
         f"{len(seed['payments'])} payments in review, {len(seed['cases'])} open case, {len(seed['deals'])} deals."
     )
 

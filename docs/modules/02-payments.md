@@ -2,7 +2,7 @@
 
 **9:35 to 10:30.** One bank in a graph, the Bank tools in Arcade, the control plane in front of them, and a Strands Graph whose one irreversible step is checked against the graph before it runs.
 
-You leave with Larkspur Bank seeded in Neo4j, the Bank MCP server deployed to your Arcade project, the control plane registered as Arcade's Contextual Access hooks, and a payments desk that holds two releases a name screen would have let through.
+You leave with Bowser Capital seeded in Neo4j, the Bank MCP server deployed to your Arcade project, the control plane registered as Arcade's Contextual Access hooks, and a payments desk that holds two releases a name screen would have let through.
 
 ## The desk
 

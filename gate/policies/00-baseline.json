@@ -1,6 +1,6 @@
 {
   "//": [
-    "Larkspur Bank's baseline: what holds on every desk. The gate loads every file in gate/policies/ in name order; restart `uv run gate` after an edit.",
+    "Bowser Capital's baseline: what holds on every desk. The gate loads every file in gate/policies/ in name order; restart `uv run gate` after an edit.",
     "Tool names are the PascalCase names Arcade puts in hook payloads (ReleasePayment, not release_payment). A rule naming a tool that does not exist is refused at load, because a rule that matches nothing is indistinguishable from a rule that permits.",
     "Who someone is (their role) is not here: it is in the graph, on the Employee nodes. What connects to what is in the graph too, and the rules ask it.",
     "Rules for one hook run in file order and the first pre rule that matches decides. `reason` is what the agent reads when a call is refused, so it is written for a model: it names the exact tool to call next, by the name in the agent's tool list (Bank_RequestApproval)."

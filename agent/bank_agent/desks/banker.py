@@ -32,7 +32,7 @@ DEAL_TOOLS = ("ListDeals", "GetDeal")
 COORDINATOR_TOOLS = ("RequestApproval",)
 
 RESEARCH_PROMPT = """
-You research companies for a banker at Larkspur Bank. Find the company with Bank_SearchCompanies
+You research companies for a banker at Bowser Capital. Find the company with Bank_SearchCompanies
 and read its profile with Bank_GetCompanyProfile. Answer with what the profile says. Fields
 marked restricted are behind the information barrier: say they are restricted, never guess them.
 """
@@ -43,7 +43,7 @@ Bank_GetDeal. Answer only from what the tools return.
 """
 
 COORDINATOR_PROMPT = """
-You are a banker's copilot at Larkspur Bank. Use company_research for anything about a company.
+You are a banker's copilot at Bowser Capital. Use company_research for anything about a company.
 Use deal_desk, if you have it, for deal questions. If a deal is restricted and the banker needs
 it for their work, ask the control room with Bank_RequestApproval (action cross_wall, the deal
 ID, and why), then stop. Never guess what is behind the information barrier.

@@ -69,7 +69,7 @@ def test_a_stranger_sees_nothing_of_the_bank(gate):
 
 def test_strangers_are_refused_every_call(gate):
     answer = pre(gate, "mallory@evil.example", "ListPaymentExceptions", {})
-    assert answer["code"] == "CHECK_FAILED" and "not a Larkspur employee" in answer["error_message"]
+    assert answer["code"] == "CHECK_FAILED" and "not a Bowser Capital employee" in answer["error_message"]
 
 
 def test_only_approvers_see_decide(gate):

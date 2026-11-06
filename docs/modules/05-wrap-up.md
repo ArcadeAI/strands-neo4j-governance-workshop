@@ -41,7 +41,7 @@ The same agents run on Amazon Bedrock AgentCore Runtime (`agent/bank_agent/agent
 
 ## Make it yours
 
-Replace Larkspur Bank with your own system of record: swap `neo4j/bank_graph/seed.json` and the queries in `mcp/bank_tools/graph.py`, keep the tool signatures typed so a policy can read them, and add graph questions to `gate/bank_gate/directory.py` (with the same answer in `tests/support/memory_graph.py`, which `tests/test_neo4j_live.py` holds to the real Cypher).
+Replace Bowser Capital with your own system of record: swap `neo4j/bank_graph/seed.json` and the queries in `mcp/bank_tools/graph.py`, keep the tool signatures typed so a policy can read them, and add graph questions to `gate/bank_gate/directory.py` (with the same answer in `tests/support/memory_graph.py`, which `tests/test_neo4j_live.py` holds to the real Cypher).
 
 For a finale or a stretch module, see [`docs/bold-bets.md`](../bold-bets.md).
 

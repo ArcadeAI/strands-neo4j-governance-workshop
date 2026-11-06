@@ -126,7 +126,7 @@ def default_script(messages: Sequence[dict[str, Any]], tool_names: list[str]) ->
         if "Bank_ListPaymentExceptions" in tool_names:
             return Call("Bank_ListPaymentExceptions", {})
         return Say(
-            "I'm Larkspur Bank's assistant, running on a scripted model with no bank tools connected yet. "
+            "I'm Bowser Capital's assistant, running on a scripted model with no bank tools connected yet. "
             "Set MODEL_PROVIDER in .env to give me a real model, and ARCADE_API_KEY to connect the bank."
         )
     last = history[-1]

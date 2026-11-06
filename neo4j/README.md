@@ -1,4 +1,4 @@
-# Larkspur Bank's graph
+# Bowser Capital's graph
 
 [`bank_graph/seed.json`](./bank_graph/seed.json) is the one source of truth for all three desks: ten employees, the people and companies they deal with, ownership and board seats, accounts and the transfers between them, a synthetic sanctions list, three payment exceptions, one AML case and two advisory deals. Three ways to load it:
 

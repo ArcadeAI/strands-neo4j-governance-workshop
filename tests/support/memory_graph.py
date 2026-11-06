@@ -1,4 +1,4 @@
-"""Larkspur Bank's graph in memory, from the same `seed.json` Neo4j is loaded from.
+"""Bowser Capital's graph in memory, from the same `seed.json` Neo4j is loaded from.
 
 One `MemoryGraph` is both sides of the real deployment: `.book()` is the `Book` the Bank tools
 write through, and the graph itself is the `Directory` the control plane reads. An approval Sana

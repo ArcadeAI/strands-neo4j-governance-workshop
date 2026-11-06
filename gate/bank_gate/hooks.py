@@ -59,7 +59,7 @@ class Hooks:
             if subject is None:
                 deny[toolkit] = {"tools": dict(versions)}
                 self.audit.record(hook="access", outcome="hidden", user_id=user or "-", tool=f"{toolkit}.*",
-                                  detail="not a Larkspur employee")
+                                  detail="not a Bowser Capital employee")
                 continue
             hidden = hidden_tools(self.policy, self._facts(user, subject, {}, ""), list(versions))
             if hidden:
@@ -84,7 +84,7 @@ class Hooks:
         internal = toolkit.lower() == self.policy.toolkit.lower()
         subject = self.directory.employee(user) if user else None
         if internal and subject is None:
-            message = f"DENIED: {user or 'this caller'} is not a Larkspur employee, so no Bank tool runs for them. [ref {execution_id}]"
+            message = f"DENIED: {user or 'this caller'} is not a Bowser Capital employee, so no Bank tool runs for them. [ref {execution_id}]"
             self.audit.record(**base, outcome="denied", rule="baseline.employees-only", detail=message)
             return {"code": CHECK_FAILED, "error_message": message}
 

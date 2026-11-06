@@ -12,9 +12,9 @@ help:
 	@echo "make check M=02       the tests for one module"
 	@echo "make start M=02       put a module's TODOs in place;  make solve M=02  its solution"
 	@echo "make verify-modules   every starter fails its check and every solution passes it"
-	@echo "make staff            who works at Larkspur Bank, and what each person may do"
+	@echo "make staff            who works at Bowser Capital, and what each person may do"
 	@echo "make neo4j-up         a local Neo4j in Docker (or use Aura Free: docs/modules/00-setup.md)"
-	@echo "make seed             load the Larkspur Bank graph into NEO4J_URI, replacing what is there"
+	@echo "make seed             load the Bowser Capital graph into NEO4J_URI, replacing what is there"
 	@echo "make gate             run the control plane on :8742"
 	@echo "make deploy-mcp       deploy the Bank MCP server to Arcade"
 

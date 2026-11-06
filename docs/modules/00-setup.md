@@ -20,7 +20,7 @@ You leave with the repository installed and its tests green, a Neo4j database yo
 
 1. Install and run the tests:
 
-       git clone <this repository> larkspur-bank && cd larkspur-bank
+       git clone <this repository> bowser-capital && cd bowser-capital
        uv sync
        make test
 
@@ -34,7 +34,7 @@ You leave with the repository installed and its tests green, a Neo4j database yo
 
 ## The bank and the cast
 
-Larkspur Bank is synthetic, and so is everything in it: names, accounts, SSNs (900- area numbers, which are never issued) and the sanctions list, `SYN-SDN`, which is shaped like a real list and is not one. Its staff live in the graph, each with a role:
+Bowser Capital is synthetic, and so is everything in it: names, accounts, SSNs (900- area numbers, which are never issued) and the sanctions list, `SYN-SDN`, which is shaped like a real list and is not one. Its staff live in the graph, each with a role:
 
 | Employee | Role | Desk |
 |---|---|---|

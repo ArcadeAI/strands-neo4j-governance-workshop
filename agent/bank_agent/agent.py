@@ -1,4 +1,4 @@
-"""Larkspur Bank's assistant: one Strands `Agent`, a model, and tools that run through Arcade.
+"""Bowser Capital's assistant: one Strands `Agent`, a model, and tools that run through Arcade.
 
 This is module 01. Every desk after it (payments, AML, banker) is built from the same parts:
 a model from `make_model`, the Bank tools Arcade lists for one employee, and the transcript hook.

@@ -1,6 +1,6 @@
 # The control plane
 
-Arcade's Contextual Access hooks for Larkspur Bank: one small FastAPI service (`uv run gate`, port 8742) and one policy file per desk. Arcade calls it on every tool listing and every tool call in your project. Nothing is hosted for you; it runs on your laptop behind a tunnel.
+Arcade's Contextual Access hooks for Bowser Capital: one small FastAPI service (`uv run gate`, port 8742) and one policy file per desk. Arcade calls it on every tool listing and every tool call in your project. Nothing is hosted for you; it runs on your laptop behind a tunnel.
 
 ```
 uv run gate                         # GATE_TOKEN and NEO4J_* from .env

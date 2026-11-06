@@ -1,4 +1,4 @@
-# Larkspur Bank: governed Strands agents on a Neo4j graph, with Arcade
+# Bowser Capital: governed Strands agents on a Neo4j graph, with Arcade
 
 A hands-on workshop. You build three agent desks at one synthetic bank with [Strands Agents](https://strandsagents.com), give them one bank that lives in a [Neo4j](https://neo4j.com) graph, and govern every tool call they make with [Arcade](https://arcade.dev), so the bank's controls hold however the prompt is worded.
 
@@ -47,7 +47,7 @@ Modules 01 to 04 each have a hands-on exercise. `make start M=02` puts that modu
 ## Quickstart
 
 ```sh
-git clone <this repository> larkspur-bank && cd larkspur-bank
+git clone <this repository> bowser-capital && cd bowser-capital
 uv sync
 make test                       # credential-free: models, Arcade and Neo4j are all faked
 cp .env.example .env            # fill it in block by block as the modules reach each one
