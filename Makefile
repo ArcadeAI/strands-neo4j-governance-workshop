@@ -1,20 +1,22 @@
-.PHONY: help setup test check start solve status neo4j-up neo4j-down seed seed-cypher gate deploy-mcp
+.PHONY: help setup test check verify-modules start solve status staff neo4j-up neo4j-down seed seed-cypher gate deploy-mcp
 
 M ?=
 CHECK_01 := tests/test_agent.py
-CHECK_02 := tests/test_arcade_tools.py tests/test_connected_apps.py
-CHECK_03 := tests/test_gate.py tests/test_governed_loop.py
-CHECK_04 := tests/test_evals.py
+CHECK_02 := tests/test_payments_desk.py
+CHECK_03 := tests/test_aml_desk.py
+CHECK_04 := tests/test_banker_desk.py tests/test_evals.py
 
 help:
 	@echo "make setup            install everything (uv sync)"
 	@echo "make test             the whole credential-free test suite"
 	@echo "make check M=02       the tests for one module"
 	@echo "make start M=02       put a module's TODOs in place;  make solve M=02  its solution"
+	@echo "make verify-modules   every starter fails its check and every solution passes it"
+	@echo "make staff            who works at Larkspur Bank, and what each person may do"
 	@echo "make neo4j-up         a local Neo4j in Docker (or use Aura Free: docs/modules/00-setup.md)"
-	@echo "make seed             load the loan desk graph into NEO4J_URI, replacing what is there"
+	@echo "make seed             load the Larkspur Bank graph into NEO4J_URI, replacing what is there"
 	@echo "make gate             run the control plane on :8742"
-	@echo "make deploy-mcp       deploy the Loan Desk MCP server to Arcade"
+	@echo "make deploy-mcp       deploy the Bank MCP server to Arcade"
 
 setup:
 	uv sync
@@ -34,6 +36,12 @@ solve:
 
 status:
 	uv run python scripts/workshop.py status
+
+verify-modules:
+	uv run python scripts/verify_modules.py
+
+staff:
+	uv run staff
 
 neo4j-up:
 	docker compose up -d neo4j

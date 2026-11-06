@@ -1,6 +1,6 @@
 # A local Neo4j for the workshop: `make neo4j-up`. The password comes from NEO4J_PASSWORD in .env.
-# The Loan Desk tools run in Arcade's cloud once deployed, so they reach this database only through
-# a tunnel (docs/modules/02-connect.md). Neo4j Aura Free avoids that.
+# The Bank tools run in Arcade's cloud once deployed, so they reach this database only through
+# a tunnel (docs/modules/02-payments.md). Neo4j Aura Free avoids that.
 services:
   neo4j:
     image: neo4j:5.26-community

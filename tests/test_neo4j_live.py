@@ -7,16 +7,18 @@ The in-memory graph the rest of the suite uses is held to the same answers here.
 """
 
 import asyncio
+import json
 import os
 
 import pytest
 
-from loan_graph import load_seed
-from loan_graph.seed import load
+from bank_graph import load_seed
+from bank_graph.seed import load
 from support.memory_graph import MemoryGraph
 
 URI = os.environ.get("NEO4J_TEST_URI", "")
 pytestmark = pytest.mark.skipif(not URI, reason="set NEO4J_TEST_URI to run against a live Neo4j")
+AT = "2026-11-06T12:00:00Z"
 
 
 @pytest.fixture(scope="module")
@@ -28,7 +30,7 @@ def auth():
 def directory(auth):
     from neo4j import GraphDatabase
 
-    from loan_gate.directory import Neo4jDirectory
+    from bank_gate.directory import Neo4jDirectory
 
     driver = GraphDatabase.driver(URI, auth=auth)
     load(driver, load_seed(), reset=True)
@@ -36,27 +38,43 @@ def directory(auth):
     driver.close()
 
 
-def test_group_exposure_matches_the_memory_graph(directory):
-    for loan in ("LN-2297", "LN-2291", "LN-2299"):
-        assert directory.group_exposure(loan) == MemoryGraph().group_exposure(loan)
-    assert directory.officer("alice@bank.example")["clearance"] == 50000
+def test_the_gate_queries_match_the_memory_graph(directory):
+    memory = MemoryGraph()
+    for payment in ("PMT-5001", "PMT-5002", "PMT-5003"):
+        assert directory.sanctions_proximity(payment, 3) == memory.sanctions_proximity(payment, 3)
+        assert directory.inbound_near_threshold(payment, 8000, 10000, 14) == memory.inbound_near_threshold(payment, 8000, 10000, 14)
+    for recipient in ("rita@bank.example", "omar@bank.example", "pat@bank.example", "rita.patel", "nobody@example.com"):
+        assert directory.case_subject_near(recipient, 2) == memory.case_subject_near(recipient, 2)
+    for email in ("ava@bank.example", "marco@bank.example", "dana@bank.example"):
+        assert directory.linked(email, "P-HALE", 3) == memory.linked(email, "P-HALE", 3)
+    for email in ("ian@bank.example", "mia@bank.example"):
+        assert directory.deals_open_to(email, AT) == memory.deals_open_to(email, AT)
+    assert directory.case("CASE-7001") == memory.case("CASE-7001")
+    assert directory.employee("sana@bank.example") == memory.employee("sana@bank.example")
     assert directory.ping()
 
 
 def test_the_tool_queries_match_the_memory_graph(directory, auth):
     from neo4j import AsyncGraphDatabase
 
-    from loan_desk.graph import Neo4jLoanBook
+    from bank_tools.graph import Neo4jBook
+
+    def paths(chains):
+        return sorted(json.dumps(chain, sort_keys=True) for chain in chains)
 
     async def compare():
         driver = AsyncGraphDatabase.driver(URI, auth=auth)
         try:
-            live, memory = Neo4jLoanBook(driver), MemoryGraph().book()
-            assert await live.search_loans("pending", None, None) == await memory.search_loans("pending", None, None)
-            assert sorted(map(str, await live.borrower_network("LN-2297"))) == sorted(map(str, await memory.borrower_network("LN-2297")))
-            got, want = await live.get_loan("LN-2288"), await memory.get_loan("LN-2288")
-            assert {k: v for k, v in got.items() if k != "guarantors"} == {k: v for k, v in want.items() if k != "guarantors"}
-            assert await live.approvers_for(88000, "alice@bank.example") == await memory.approvers_for(88000, "alice@bank.example")
+            live, memory = Neo4jBook(driver), MemoryGraph().book()
+            assert await live.payment_exceptions() == await memory.payment_exceptions()
+            assert await live.get_payment("PMT-5001") == await memory.get_payment("PMT-5001")
+            assert await live.screen_party("Brightwater Trading") == await memory.screen_party("Brightwater Trading")
+            assert await live.get_case("CASE-7001") == await memory.get_case("CASE-7001")
+            assert paths(await live.trace_funds("ACC-HALE", 4)) == paths(await memory.trace_funds("ACC-HALE", 4))
+            assert await live.trace_ownership("P-HALE") == await memory.trace_ownership("P-HALE")
+            assert await live.company_profile("C-NORTHWIND") == await memory.company_profile("C-NORTHWIND")
+            assert await live.list_deals() == await memory.list_deals()
+            assert await live.approvers(["sanctions_officer"]) == await memory.approvers(["sanctions_officer"])
         finally:
             await driver.close()
 
@@ -64,7 +82,7 @@ def test_the_tool_queries_match_the_memory_graph(directory, auth):
 
 
 class LiveGraph:
-    """Both sides on one live database: the gate's directory and, per call, the tools' loan book."""
+    """Both sides on one live database: the gate's directory and, per call, the tools' book."""
 
     def __init__(self, directory, auth):
         self.directory, self.auth = directory, auth
@@ -84,40 +102,36 @@ class LiveBook:
         async def call(*args, **kwargs):
             from neo4j import AsyncGraphDatabase
 
-            from loan_desk.graph import Neo4jLoanBook
+            from bank_tools.graph import Neo4jBook
 
             async with AsyncGraphDatabase.driver(URI, auth=self.auth) as driver:
-                return await getattr(Neo4jLoanBook(driver), name)(*args, **kwargs)
+                return await getattr(Neo4jBook(driver), name)(*args, **kwargs)
 
         return call
 
 
-def test_the_governed_loop_on_neo4j(directory, auth):
-    import json
-
-    from loan_agent.agent import build_agent
-    from loan_agent.cli import approvals
-    from loan_agent.config import Settings
-    from loan_agent.scripted import Call, ScriptedModel, steps
+def test_the_payments_hold_on_neo4j(directory, auth):
+    from bank_agent.cli import approvals
+    from bank_agent.config import Settings
+    from bank_agent.desks.payments import build_payments_desk
     from support.fake_arcade import FakeArcadeEngine
 
     engine = FakeArcadeEngine(LiveGraph(directory, auth))
     try:
-        alice, charlie = Settings(user="alice@bank.example"), Settings(user="charlie@bank.example")
-        approve = Call("LoanDesk_ApproveLoan", {"loan_id": "LN-2291", "amount": 95000})
-        escalate = Call("LoanDesk_RequestApproval", {"action": "approve_loan", "resource_id": "LN-2291", "amount": 95000, "justification": "ok"})
-        desk = build_agent(alice, model=ScriptedModel(steps(approve, escalate)), engine=engine)
-        desk("go")
-        refused, requested = desk.transcript.calls
-        assert refused.refused
+        pat, sana = Settings(user="pat@bank.example", desk="payments"), Settings(user="sana@bank.example", desk="payments")
+        run = build_payments_desk(pat, engine=engine)
+        run("Work PMT-5001")
+        refused = next(c for c in run.transcript.calls if c.name == "Bank_ReleasePayment")
+        assert refused.refused and "Orlov Maritime Ltd" in refused.text
+        requested = next(c for c in run.transcript.calls if c.name == "Bank_RequestApproval")
         request_id = json.loads(requested.text)["request_id"]
-        assert approvals(engine, charlie, request_id, "approve", "fine")["status"] == "approved"
+        assert directory.request(request_id)["routed_to"] == "sana@bank.example"
+        assert approvals(engine, sana, request_id, "approve", "Originator confirmed.")["status"] == "approved"
 
-        retry = build_agent(alice, model=ScriptedModel(steps(approve)), engine=engine)
-        retry("go")
-        assert not retry.transcript.calls[0].refused
-        assert json.loads(retry.transcript.calls[0].text)["status"] == "approved"
+        retry = build_payments_desk(pat, engine=engine)
+        retry("Work PMT-5001")
+        released = next(c for c in retry.transcript.calls if c.name == "Bank_ReleasePayment")
+        assert not released.refused
         assert directory.request(request_id)["consumed_at"]
-        assert directory.group_exposure("LN-2297") == 47500 + 95000
     finally:
         engine.close()

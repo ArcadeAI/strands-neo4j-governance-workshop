@@ -2,17 +2,24 @@
 
 import pytest
 
-from loan_agent.agent import build_agent
-from loan_agent.config import Settings
-from loan_agent.local_tools import loan_payment
-from loan_agent.models import make_model, provider_of
-from loan_agent.scripted import Call, Say, ScriptedModel, steps
+from bank_agent.agent import build_agent
+from bank_agent.config import Settings
+from bank_agent.local_tools import fx_convert
+from bank_agent.models import make_model, provider_of
+from bank_agent.scripted import Call, Say, ScriptedModel, steps
 
 
 def test_settings_read_the_environment():
-    settings = Settings.from_env({"LOAN_DESK_USER": "Bob@Bank.Example", "ARCADE_TOOLS_PER_TASK": "3", "MODEL_PROVIDER": "Anthropic"})
-    assert settings.user == "bob@bank.example" and settings.tools_per_task == 3 and settings.model_provider == "anthropic"
-    assert Settings.from_env({}, user="charlie@bank.example").user == "charlie@bank.example"
+    settings = Settings.from_env({"BANK_USER": "Ava@Bank.Example", "ARCADE_TOOLS_PER_TASK": "3", "MODEL_PROVIDER": "Anthropic"})
+    assert settings.user == "ava@bank.example" and settings.tools_per_task == 3 and settings.model_provider == "anthropic"
+    assert Settings.from_env({}, user="sana@bank.example").user == "sana@bank.example"
+
+
+def test_each_desk_has_its_usual_employee():
+    assert [Settings.from_env({}, desk=d).user for d in ("assistant", "payments", "aml", "banker")] == [
+        "pat@bank.example", "pat@bank.example", "ava@bank.example", "ian@bank.example"]
+    with pytest.raises(ValueError, match="desk"):
+        Settings.from_env({}, desk="loans")
 
 
 @pytest.mark.parametrize(
@@ -45,39 +52,54 @@ def test_models_build_without_calling_anyone():
     assert isinstance(make_model(Settings.from_env({})), ScriptedModel)
 
 
-def test_loan_payment():
-    result = loan_payment._tool_func(principal=100000, annual_rate_pct=6, years=10)
-    assert result["monthly_payment"] == pytest.approx(1110.21, abs=0.01)
-    assert loan_payment._tool_func(principal=1200, annual_rate_pct=0, years=1)["monthly_payment"] == 100
+def test_fx_convert():
+    assert fx_convert._tool_func(amount=2500, from_currency="eur")["converted"] == 2700.0
+    assert fx_convert._tool_func(amount=100, from_currency="USD", to_currency="GBP")["converted"] == pytest.approx(78.74, abs=0.01)
+    with pytest.raises(ValueError, match="No reference rate"):
+        fx_convert._tool_func(amount=1, from_currency="XYZ")
 
 
 def test_without_arcade_the_agent_has_only_local_tools_and_says_so():
     desk = build_agent(Settings.from_env({}))
-    assert desk.agent.tool_names == ["loan_payment"]
+    assert desk.agent.tool_names == ["fx_convert"]
     assert "not connected" in desk.agent.system_prompt
-    assert "scripted model" in str(desk("Which loans are pending?"))
+    assert "scripted model" in str(desk("Which payments are waiting?"))
 
 
 def test_the_scripted_model_calls_a_local_tool():
-    model = ScriptedModel(steps(Call("loan_payment", {"principal": 12000, "annual_rate_pct": 0, "years": 1})))
+    model = ScriptedModel(steps(Call("fx_convert", {"amount": 1000, "from_currency": "EUR"})))
     desk = build_agent(Settings.from_env({}), model=model)
-    result = desk("What would 12k over a year at 0% cost per month?")
-    assert desk.transcript.names() == ["loan_payment"]
-    assert '"monthly_payment": 1000.0' in str(result)
+    result = desk("What is 1,000 EUR in dollars?")
+    assert desk.transcript.names() == ["fx_convert"]
+    assert '"converted": 1080.0' in str(result)
 
 
-def test_the_default_script_lists_pending_loans(arcade):
+def test_the_default_script_lists_payment_exceptions(arcade):
     desk = build_agent(Settings.from_env({}), model=ScriptedModel(), engine=arcade)
     result = desk("anything")
-    assert desk.transcript.names() == ["LoanDesk_SearchLoans"]
-    assert "LN-2299" in str(result)
+    assert desk.transcript.names() == ["Bank_ListPaymentExceptions"]
+    assert "PMT-5002" in str(result)
 
 
-def test_the_instructions_say_nothing_about_limits():
-    from loan_agent.agent import INSTRUCTIONS
+def test_with_arcade_the_agent_sees_what_arcade_lists_for_its_employee(arcade):
+    pat = build_agent(Settings(user="pat@bank.example"), model=ScriptedModel(), engine=arcade).agent.tool_names
+    ian = build_agent(Settings(user="ian@bank.example"), model=ScriptedModel(), engine=arcade).agent.tool_names
+    assert "Bank_ReleasePayment" in pat and "Bank_ReleasePayment" not in ian
+    assert "Bank_GetDeal" not in pat and "Bank_GetDeal" not in ian
+    assert "Bank_FreezeAccount" not in pat and "arcade_select_tools" in pat
 
-    for figure in ("50,000", "50000", "250,000", "250000", "clearance"):
-        assert figure not in INSTRUCTIONS
+
+def test_no_prompt_states_a_rule_the_control_plane_enforces():
+    from bank_agent.agent import INSTRUCTIONS
+
+    from bank_agent.desks import aml, banker, common, payments
+
+    prompts = [INSTRUCTIONS, common.GOVERNED, payments.SCREEN_PROMPT, payments.RELEASE_PROMPT, payments.HOLD_PROMPT,
+               aml.FUNDS_PROMPT, aml.OWNERSHIP_PROMPT, aml.SCREENER_PROMPT, aml.LEAD_PROMPT,
+               banker.RESEARCH_PROMPT, banker.DEAL_PROMPT, banker.COORDINATOR_PROMPT]
+    for prompt in prompts:
+        for figure in ("10,000", "10000", "hops", "three hops", "two hops", "SYN-SDN", "Orlov", "Rita", "Falcon"):
+            assert figure not in prompt
 
 
 def test_say_ends_the_turn():

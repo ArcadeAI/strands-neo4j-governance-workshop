@@ -1,0 +1,80 @@
+{
+  "//": [
+    "The AML case team. Three controls a prompt cannot hold: no tipping off, four eyes on the actions that hurt a customer, and no approver with a stake in the subject.",
+    "Tipping off is checked on the recipient of an outbound message, in Gmail or Slack, whoever sends it: anyone within two hops of the subject of an open case (their relationship manager, a fellow director) is off limits. 31 U.S.C. 5318(g)(2) makes disclosing a SAR to the subject unlawful; the bank's rule is wider, on purpose.",
+    "A freeze or a SAR always needs a second person. That person must be a BSA officer, must not own the case, and must have no path to the subject within three hops: the graph is the conflict-of-interest register.",
+    "PII is masked for everyone: the model never needs an SSN or a full account number to investigate, and the SAR record links to the subject in the graph, not to digits a model copied."
+  ],
+  "toolkit": "Bank",
+  "rules": [
+    {
+      "id": "access.case-tools-for-the-aml-team",
+      "hook": "access",
+      "description": "Only the AML team sees the case tools.",
+      "tools": ["GetCase", "TraceFunds", "TraceOwnership", "FreezeAccount", "FileSar"],
+      "when": {"role_not_in": ["aml_investigator", "bsa_officer"]},
+      "reason": "Case tools are for the AML team."
+    },
+    {
+      "id": "pre.no-tipping-off",
+      "hook": "pre",
+      "description": "No message goes to anyone within two hops of the subject of an open case.",
+      "tools": ["Gmail.SendEmail", "Slack.SendDmToUser"],
+      "when": {"recipient_near_case_subject": 2},
+      "reason": "DENIED: {{recipient}} is {{hops}} hops from {{subject}}, the subject of open case {{case_id}}: {{chain}}. Telling them could tip off the subject, which the bank forbids and federal law forbids for a SAR (31 U.S.C. 5318(g)(2)). Do not contact anyone about this case, directly or through someone else. Record what you need in the case instead."
+    },
+    {
+      "id": "pre.freeze-needs-four-eyes",
+      "hook": "pre",
+      "description": "A freeze always needs a second person's approval.",
+      "tools": ["FreezeAccount"],
+      "when": {"always": true},
+      "escalate": "freeze_account",
+      "resource": "account_id",
+      "reason": "DENIED: freezing {{account_id}} needs a second person's sign-off. Call Bank_RequestApproval with action=freeze_account, resource_id={{account_id}}, case_id={{case_id}} and justification=<the evidence>, then stop. Once a BSA officer approves, retry Bank_FreezeAccount with the same arguments once."
+    },
+    {
+      "id": "pre.sar-needs-four-eyes",
+      "hook": "pre",
+      "description": "Filing a SAR always needs a second person's approval.",
+      "tools": ["FileSar"],
+      "when": {"always": true},
+      "escalate": "file_sar",
+      "resource": "case_id",
+      "reason": "DENIED: filing a SAR on {{case_id}} needs a second person's sign-off. Call Bank_RequestApproval with action=file_sar, resource_id={{case_id}} and justification=<the narrative in brief>, then stop. Once a BSA officer approves, retry Bank_FileSar with the same arguments once."
+    },
+    {
+      "id": "pre.decide-case-actions-as-bsa-officer",
+      "hook": "pre",
+      "description": "Only a BSA officer decides a freeze or a SAR.",
+      "tools": ["Decide"],
+      "when": {"request_action_in": ["freeze_account", "file_sar"], "role_not_in": ["bsa_officer"]},
+      "reason": "DENIED: {{request_id}} is a {{request_action}} request, which only a BSA officer decides."
+    },
+    {
+      "id": "pre.decide-not-the-case-owner",
+      "hook": "pre",
+      "description": "The case owner never approves their own case's freeze or SAR.",
+      "tools": ["Decide"],
+      "when": {"request_action_in": ["freeze_account", "file_sar"], "caller_owns_case": true},
+      "reason": "DENIED: you own {{case_id}}, so a second person must decide {{request_id}}."
+    },
+    {
+      "id": "pre.decide-without-a-link-to-the-subject",
+      "hook": "pre",
+      "description": "An approver with a path to the subject within three hops has a conflict and cannot decide.",
+      "tools": ["Decide"],
+      "when": {"request_action_in": ["freeze_account", "file_sar"], "caller_linked_to_subject": 3},
+      "reason": "DENIED: you are {{hops}} hops from {{subject}}, the subject of {{case_id}}: {{chain}}. That is a conflict of interest, so you cannot decide {{request_id}}; it needs a BSA officer with no link to the subject."
+    },
+    {
+      "id": "post.mask-pii",
+      "hook": "post",
+      "description": "Masks SSNs, dates of birth and full account numbers on every Bank tool, for everyone, before a model reads them.",
+      "tools": ["*"],
+      "redact": ["ssn", "dob", "account_number"],
+      "replacement": "[MASKED]",
+      "reason": "Personal identifiers masked before the output reached the model."
+    }
+  ]
+}
