@@ -2,8 +2,8 @@
 
 from bank_agent.agent import build_agent
 from bank_agent.cli import run_with_confirmation
-from bank_agent.confirm import ConfirmActions
 from bank_agent.config import Settings
+from bank_agent.confirm import ConfirmActions
 from bank_agent.scripted import Call, ScriptedModel, steps
 
 ME = "attendee@company.example"

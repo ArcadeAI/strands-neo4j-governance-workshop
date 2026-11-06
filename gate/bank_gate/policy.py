@@ -366,7 +366,7 @@ def apply_post(policy: Policy, tool: str, facts: Facts, output: Any) -> tuple[An
             continue
         changed: list[str] = []
 
-        def walk(node: Any, path: str = "", active: bool = rule.per_record is None) -> Any:
+        def walk(node: Any, path: str = "", active: bool = rule.per_record is None, rule: Rule = rule, changed: list[str] = changed) -> Any:
             if isinstance(node, dict):
                 here_active = active
                 if rule.per_record is not None and rule.per_record in node:

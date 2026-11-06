@@ -1,0 +1,46 @@
+{
+  "//": [
+    "The payments exceptions desk. A release is the one irreversible step, so it is the one the graph is asked about.",
+    "The sanctions list in the seed is synthetic. A beneficiary three ownership or control hops from a listed entity matches no name on the list; the graph still sees it. A hold here is a risk-based review, stricter than the OFAC 50 Percent Rule on purpose.",
+    "Structuring counts what the beneficiary has already received, which only the transfer graph knows: no single payment in the pattern looks wrong."
+  ],
+  "toolkit": "Bank",
+  "rules": [
+    {
+      "id": "access.payments-writes-for-payments-ops",
+      "hook": "access",
+      "description": "Only payments operations sees the tools that release or hold a payment.",
+      "tools": ["ReleasePayment", "HoldPayment"],
+      "when": {"role_not_in": ["payments_ops"]},
+      "reason": "Releasing and holding payments is for payments operations."
+    },
+    {
+      "id": "pre.release-near-a-sanctioned-entity",
+      "hook": "pre",
+      "description": "A release is held when the beneficiary is within three ownership or control hops of an entity on the sanctions list, and goes to a sanctions officer.",
+      "tools": ["ReleasePayment"],
+      "when": {"beneficiary_near_sanctioned": 3},
+      "escalate": "release_payment",
+      "resource": "payment_id",
+      "reason": "HELD: the beneficiary of {{payment_id}} is {{hops}} hops from {{listed}} ({{entry}}) on the sanctions list: {{chain}}. A name screen does not show this; the ownership graph does. Do not release or re-route it. Call Bank_RequestApproval with action=release_payment, resource_id={{payment_id}} and justification=<what you know about the beneficiary>, then stop: a sanctions officer decides. If they approve, retry Bank_ReleasePayment with payment_id={{payment_id}} once."
+    },
+    {
+      "id": "pre.release-into-a-structuring-pattern",
+      "hook": "pre",
+      "description": "A release is held when it would be the fourth or later payment just under $10,000 into the same beneficiary within fourteen days.",
+      "tools": ["ReleasePayment"],
+      "when": {"structuring": {"floor": 8000, "threshold": 10000, "window_days": 14, "min_count": 4}},
+      "escalate": "release_payment",
+      "resource": "payment_id",
+      "reason": "HELD: {{payment_id}} would be payment number {{count}} between {{floor}} and {{threshold}} dollars into {{beneficiary}} within {{window_days}} days; the earlier ones came from {{senders}} different senders. That is a structuring pattern. Do not release, split or re-route it. Call Bank_RequestApproval with action=release_payment, resource_id={{payment_id}} and justification=<what you know about the payment>, then stop: a sanctions officer decides. If they approve, retry Bank_ReleasePayment with payment_id={{payment_id}} once."
+    },
+    {
+      "id": "pre.decide-releases-as-sanctions-officer",
+      "hook": "pre",
+      "description": "Only a sanctions officer decides a held release.",
+      "tools": ["Decide"],
+      "when": {"request_action_in": ["release_payment"], "role_not_in": ["sanctions_officer"]},
+      "reason": "DENIED: {{request_id}} is a held payment release, which only a sanctions officer decides."
+    }
+  ]
+}

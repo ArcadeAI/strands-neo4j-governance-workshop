@@ -51,3 +51,6 @@ filterwarnings = ["ignore::DeprecationWarning"]
 
 [tool.ruff]
 line-length = 140
+
+[tool.ruff.lint.isort]
+known-first-party = ["bank_agent", "bank_gate", "bank_graph", "bank_tools", "support"]

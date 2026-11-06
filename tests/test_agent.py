@@ -91,7 +91,6 @@ def test_with_arcade_the_agent_sees_what_arcade_lists_for_its_employee(arcade):
 
 def test_no_prompt_states_a_rule_the_control_plane_enforces():
     from bank_agent.agent import INSTRUCTIONS
-
     from bank_agent.desks import aml, banker, common, payments
 
     prompts = [INSTRUCTIONS, common.GOVERNED, payments.SCREEN_PROMPT, payments.RELEASE_PROMPT, payments.HOLD_PROMPT,

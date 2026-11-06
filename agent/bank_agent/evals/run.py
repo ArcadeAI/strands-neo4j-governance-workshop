@@ -108,13 +108,13 @@ def main(argv: list[str] | None = None) -> None:
     parser.add_argument("--judge", action="store_true", help="also grade each answer with an LLM judge")
     args = parser.parse_args(argv)
 
-    from bank_agent.agent import build_agent
+    from bank_agent.cli import build
     from bank_agent.config import Settings, load_env
     from bank_agent.models import make_model, provider_of
 
     load_env()
-    user, _ = EXPERIMENTS[args.experiment]
-    settings = Settings.from_env(user=user)
+    desk, user, _ = EXPERIMENTS[args.experiment]
+    settings = Settings.from_env(user=user, desk=desk)
     if not settings.arcade_api_key:
         sys.exit("The evals run the real agent through Arcade: set ARCADE_API_KEY in .env.")
     if provider_of(settings) == "scripted":

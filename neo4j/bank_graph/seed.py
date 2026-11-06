@@ -194,6 +194,7 @@ def to_cypher_script(seed: dict[str, Any]) -> str:
 def connect():
     """A driver for NEO4J_URI with NEO4J_USERNAME / NEO4J_PASSWORD, from the environment or `.env`."""
     from dotenv import find_dotenv, load_dotenv
+
     from neo4j import GraphDatabase
 
     load_dotenv(find_dotenv(usecwd=True))

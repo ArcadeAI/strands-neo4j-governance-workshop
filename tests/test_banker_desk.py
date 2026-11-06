@@ -90,7 +90,7 @@ def test_a_crossing_is_requested_decided_by_the_control_room_and_expires(arcade,
     with pytest.raises(SystemExit, match="control room"):
         approvals(arcade, Settings(user="sana@bank.example"), request["request_id"], "approve", None)
     decided = approvals(arcade, CORA, request["request_id"], "approve", "Pitch prep with Mia, two hours.", hours=2)
-    expires = datetime.fromisoformat(decided["expires_at"].replace("Z", "+00:00"))
+    expires = datetime.fromisoformat(decided["expires_at"])
     assert timedelta(hours=1, minutes=59) < expires - datetime.now(UTC) <= timedelta(hours=2)
     [crossing] = graph.crossings
     assert (crossing["email"], crossing["deal_id"], crossing["approved_by"]) == ("ian@bank.example", "DL-FALCON", "cora@bank.example")
@@ -112,5 +112,5 @@ def test_a_crossing_lasts_at_most_a_day(arcade, graph):
     desk(arcade)("I need to be brought over the wall on the Lakeside Bakehouse deal.")
     [request_id] = list(graph.requests)
     decided = approvals(arcade, CORA, request_id, "approve", None, hours=100)
-    expires = datetime.fromisoformat(decided["expires_at"].replace("Z", "+00:00"))
+    expires = datetime.fromisoformat(decided["expires_at"])
     assert expires - datetime.now(UTC) <= timedelta(hours=24)

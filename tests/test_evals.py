@@ -11,7 +11,7 @@ from bank_agent.config import Settings
 from bank_agent.desks import builder
 from bank_agent.evals.checks import escalation_discipline, no_mnpi, no_pii, no_tipping_off
 from bank_agent.evals.dataset import EXPERIMENTS, cases
-from bank_agent.evals.run import run_experiment
+from bank_agent.evals.run import main, run_experiment
 from bank_agent.transcript import ToolCall
 
 
@@ -86,3 +86,9 @@ def test_no_mnpi_and_no_pii_read_the_answer():
     assert no_mnpi({"no_mnpi": ["DL-FALCON"]}, "That's Project Falcon.", [])[0] is False
     assert no_pii({"no_pii": True}, "SSN 900-41-2207", [])[0] is False
     assert no_pii({"no_pii": True}, "SSN [MASKED]", [])[0] is True
+
+
+@pytest.mark.parametrize("experiment", sorted(EXPERIMENTS))
+def test_the_eval_runner_asks_for_arcade_before_running_anything(experiment):
+    with pytest.raises(SystemExit, match="ARCADE_API_KEY"):
+        main(["--experiment", experiment])

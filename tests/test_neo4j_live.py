@@ -28,9 +28,8 @@ def auth():
 
 @pytest.fixture
 def directory(auth):
-    from neo4j import GraphDatabase
-
     from bank_gate.directory import Neo4jDirectory
+    from neo4j import GraphDatabase
 
     driver = GraphDatabase.driver(URI, auth=auth)
     load(driver, load_seed(), reset=True)
@@ -55,9 +54,8 @@ def test_the_gate_queries_match_the_memory_graph(directory):
 
 
 def test_the_tool_queries_match_the_memory_graph(directory, auth):
-    from neo4j import AsyncGraphDatabase
-
     from bank_tools.graph import Neo4jBook
+    from neo4j import AsyncGraphDatabase
 
     def paths(chains):
         return sorted(json.dumps(chain, sort_keys=True) for chain in chains)
@@ -100,9 +98,8 @@ class LiveBook:
 
     def __getattr__(self, name):
         async def call(*args, **kwargs):
-            from neo4j import AsyncGraphDatabase
-
             from bank_tools.graph import Neo4jBook
+            from neo4j import AsyncGraphDatabase
 
             async with AsyncGraphDatabase.driver(URI, auth=self.auth) as driver:
                 return await getattr(Neo4jBook(driver), name)(*args, **kwargs)

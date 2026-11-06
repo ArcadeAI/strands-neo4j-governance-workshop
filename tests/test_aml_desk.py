@@ -75,7 +75,7 @@ def test_a_freeze_waits_for_the_investigator_first(arcade, graph):
 
 
 def test_a_freeze_needs_a_second_person_with_no_link_to_the_subject(arcade, graph):
-    desk, reply, asked = run(arcade, FREEZE)
+    desk, reply, _ = run(arcade, FREEZE)
     refused = next(c for c in desk.transcript.calls if c.name == "Bank_FreezeAccount")
     assert refused.refused and "second person" in refused.text
     [request] = graph.requests.values()
@@ -136,7 +136,7 @@ def test_a_sar_needs_four_eyes_too(arcade, graph):
 
 def test_emailing_the_subjects_relationship_manager_is_refused_as_tipping_off(arcade):
     arcade.authorize("Gmail", "ava@bank.example")
-    desk, reply, asked = run(arcade, "Investigate CASE-7001, then email rita@bank.example to ask about Victor Hale's companies.")
+    desk, _, asked = run(arcade, "Investigate CASE-7001, then email rita@bank.example to ask about Victor Hale's companies.")
     assert [a["tool"] for a in asked] == ["Gmail_SendEmail"]
     sent = next(c for c in desk.transcript.calls if c.name == "Gmail_SendEmail")
     assert sent.refused and "2 hops from Victor Hale" in sent.text and "5318(g)(2)" in sent.text

@@ -1,0 +1,45 @@
+{
+  "//": [
+    "The information barrier between the public side (coverage bankers) and the private side (M&A). Who is over the wall for which deal is in the graph: an INSIDER_ON edge, or a WALL_CROSSED edge the control room approved, which carries its own expiry.",
+    "The access hook hides the deal tools from anyone over the wall for no deal. The post hook masks each deal record, wherever it appears (a company profile carries its deals), for anyone not over the wall for that deal, so one answer can show one deal and mask another.",
+    "A crossing ends on its own: when expires_at passes, the next call is checked against a graph that no longer opens the deal."
+  ],
+  "toolkit": "Bank",
+  "rules": [
+    {
+      "id": "access.deal-tools-behind-the-wall",
+      "hook": "access",
+      "description": "Someone over the wall for no deal never sees the deal tools.",
+      "tools": ["ListDeals", "GetDeal"],
+      "when": {"not_over_wall": true},
+      "reason": "The deal tools are behind the information barrier."
+    },
+    {
+      "id": "pre.read-a-deal-only-over-the-wall",
+      "hook": "pre",
+      "description": "Someone over the wall for one deal still cannot read another.",
+      "tools": ["GetDeal"],
+      "when": {"not_over_wall": true},
+      "reason": "DENIED: {{deal_id}} is behind the information barrier for you. If you need it for your work, call Bank_RequestApproval with action=cross_wall, resource_id={{deal_id}} and justification=<why you need to be brought over the wall>, then stop: the control room decides."
+    },
+    {
+      "id": "pre.decide-crossings-in-the-control-room",
+      "hook": "pre",
+      "description": "Only the control room decides a wall-crossing.",
+      "tools": ["Decide"],
+      "when": {"request_action_in": ["cross_wall"], "role_not_in": ["compliance_officer"]},
+      "reason": "DENIED: {{request_id}} is a wall-crossing request, which only the control room decides."
+    },
+    {
+      "id": "post.mask-deals-across-the-wall",
+      "hook": "post",
+      "description": "Masks every deal record the caller is not over the wall for, in any tool's output.",
+      "tools": ["*"],
+      "per_record": "deal_id",
+      "when": {"not_over_wall": true},
+      "redact": ["codename", "role", "counterparty", "target", "acquirer", "stage", "valuation", "terms", "insiders"],
+      "replacement": "[RESTRICTED: information barrier]",
+      "reason": "Deal details masked for someone on the other side of the wall."
+    }
+  ]
+}

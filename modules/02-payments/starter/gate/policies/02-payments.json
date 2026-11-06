@@ -1,0 +1,43 @@
+{
+  "//": [
+    "The payments exceptions desk. A release is the one irreversible step, so it is the one the graph is asked about.",
+    "The sanctions list in the seed is synthetic. A beneficiary three ownership or control hops from a listed entity matches no name on the list; the graph still sees it. A hold here is a risk-based review, stricter than the OFAC 50 Percent Rule on purpose.",
+    "Structuring counts what the beneficiary has already received, which only the transfer graph knows: no single payment in the pattern looks wrong.",
+    "TODO(module 02): two pre rules on ReleasePayment, both escalating release_payment on payment_id to a sanctions officer: one when the beneficiary is within 3 hops of a listed entity (beneficiary_near_sanctioned), one when the payment would extend a structuring pattern (structuring: floor 8000, threshold 10000, window_days 14, min_count 4). The reason is what the agent reads: make it say what to call next."
+  ],
+  "toolkit": "Bank",
+  "rules": [
+    {
+      "id": "access.payments-writes-for-payments-ops",
+      "hook": "access",
+      "description": "Only payments operations sees the tools that release or hold a payment.",
+      "tools": [
+        "ReleasePayment",
+        "HoldPayment"
+      ],
+      "when": {
+        "role_not_in": [
+          "payments_ops"
+        ]
+      },
+      "reason": "Releasing and holding payments is for payments operations."
+    },
+    {
+      "id": "pre.decide-releases-as-sanctions-officer",
+      "hook": "pre",
+      "description": "Only a sanctions officer decides a held release.",
+      "tools": [
+        "Decide"
+      ],
+      "when": {
+        "request_action_in": [
+          "release_payment"
+        ],
+        "role_not_in": [
+          "sanctions_officer"
+        ]
+      },
+      "reason": "DENIED: {{request_id}} is a held payment release, which only a sanctions officer decides."
+    }
+  ]
+}
