@@ -20,7 +20,7 @@ You leave with the repository installed and its tests green, a Neo4j database yo
 
 1. Install and run the tests:
 
-       git clone <this repository> bowser-capital && cd bowser-capital
+       git clone https://github.com/ArcadeAI/strands-neo4j-governance-workshop.git && cd strands-neo4j-governance-workshop
        uv sync
        make test
 

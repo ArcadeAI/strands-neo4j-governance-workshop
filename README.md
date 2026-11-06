@@ -47,7 +47,7 @@ Modules 01 to 04 each have a hands-on exercise. `make start M=02` puts that modu
 ## Quickstart
 
 ```sh
-git clone <this repository> bowser-capital && cd bowser-capital
+git clone https://github.com/ArcadeAI/strands-neo4j-governance-workshop.git && cd strands-neo4j-governance-workshop
 uv sync
 make test                       # credential-free: models, Arcade and Neo4j are all faked
 cp .env.example .env            # fill it in block by block as the modules reach each one
