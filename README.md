@@ -36,7 +36,7 @@ Modules 01 to 04 each have a hands-on exercise. `make start M=02` puts that modu
 - **A model**, one of:
   - **Amazon Bedrock** (the Strands default): an AWS account with Bedrock access to an Anthropic Claude model in your region, and credentials in your usual chain (`aws configure`, `aws sso login`, or `AWS_PROFILE`). Set `MODEL_PROVIDER=bedrock` and `AWS_REGION`.
   - **Anthropic**: an API key. Set `ANTHROPIC_API_KEY` (and `MODEL_PROVIDER=anthropic`, or leave it empty).
-  - Neither, to start: every desk runs on scripted models with no key until you give it one.
+  - Neither, to start: every desk runs on scripted models with no key until you give it one. The scripted models drive the offline checks (`make check`); the live desks still need Arcade.
 - **An [Arcade](https://api.arcade.dev/dashboard) account**, a project, a project API key, and the Arcade CLI: `uv tool install arcade-mcp`, then `arcade login` ([CLI reference](https://docs.arcade.dev/en/references/arcade-cli)).
 - **Neo4j**, one of:
   - **[Neo4j Aura Free](https://console.neo4j.io)** (recommended): reachable from Arcade's cloud, where the deployed Bank tools run.

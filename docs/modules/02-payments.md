@@ -53,7 +53,7 @@ A Strands `GraphBuilder` graph of three agents (`agent/bank_agent/desks/payments
   - `beneficiary_near_sanctioned: 3`, held when the beneficiary's account is within three ownership or control hops (`HOLDS`, `OWNS`, `DIRECTOR_OF`) of a listed entity.
   - `structuring: {floor: 8000, threshold: 10000, window_days: 14, min_count: 4}`, held when the release would extend a run of payments just under $10,000 into the same account.
 
-  The `reason` is what the release agent reads, and the only thing that tells it what to do next. Name the call: `Bank_RequestApproval` with `action=release_payment` and `resource_id={{payment_id}}`.
+  The `reason` is what the release agent reads, and the only thing that tells it what to do next. Name the call: `Bank_RequestApproval` with `action=release_payment` and `resource_id={{payment_id}}`. The tests read the reason too: the sanctions hold says `{{hops}} hops from {{listed}} ({{entry}})` and names `{{chain}}`; the structuring hold says `structuring`, `{{senders}} different senders` and names `{{beneficiary}}`. The template fields are listed in [`gate/README.md`](../../gate/README.md).
 
 `make check M=02` runs `tests/test_payments_desk.py`. Restart the gate after editing a policy file.
 
@@ -90,4 +90,4 @@ Then the human side:
 
 ## If you are behind
 
-`make solve M=02`. If the deploy or the tunnel is the blocker, every step above runs against the fake Arcade in `make check M=02`, and the desk runs on scripted models with no keys.
+`make solve M=02`. If the deploy or the tunnel is the blocker, every governed step above is exercised against the fake Arcade in `make check M=02`, on scripted models with no keys. The `uv run tools`, `ask` and `approve` commands need `ARCADE_API_KEY` and the deployed tools: without them the desk has no bank tools.

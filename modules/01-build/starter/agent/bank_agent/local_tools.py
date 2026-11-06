@@ -22,7 +22,7 @@ def fx_convert(amount: float, from_currency: str, to_currency: str = "USD") -> d
         from_currency: ISO code of the amount's currency, for example EUR.
         to_currency: ISO code to convert to; US dollars when left out.
     """
-    # TODO(module 01): convert through USD_PER. Accept lower-case codes, raise ValueError naming any
-    # code with no reference rate, and return {"amount", "from", "to", "rate", "converted"}, with the
+    # TODO(module 01): convert through USD_PER. Accept lower-case codes, raise ValueError("No reference
+    # rate for <CODE>") for any code without one, and return {"amount", "from", "to", "rate", "converted"}, with the
     # converted amount rounded to cents.
     raise NotImplementedError("fx_convert")

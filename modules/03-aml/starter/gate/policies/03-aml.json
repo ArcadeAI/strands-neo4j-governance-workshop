@@ -4,7 +4,7 @@
     "Tipping off is checked on the recipient of an outbound message, in Gmail or Slack, whoever sends it: anyone within two hops of the subject of an open case (their relationship manager, a fellow director) is off limits. 31 U.S.C. 5318(g)(2) makes disclosing a SAR to the subject unlawful; the bank's rule is wider, on purpose.",
     "A freeze or a SAR always needs a second person. That person must be a BSA officer, must not own the case, and must have no path to the subject within three hops: the graph is the conflict-of-interest register.",
     "PII is masked for everyone: the model never needs an SSN or a full account number to investigate, and the SAR record links to the subject in the graph, not to digits a model copied.",
-    "TODO(module 03): three pre rules. No Gmail.SendEmail or Slack.SendDmToUser to anyone within 2 hops of an open case's subject (recipient_near_case_subject). On Decide for freeze_account or file_sar: never the case owner (caller_owns_case), and never anyone with a path to the subject within 3 hops (caller_linked_to_subject)."
+    "TODO(module 03): three pre rules. No Gmail.SendEmail or Slack.SendDmToUser to anyone within 2 hops of an open case's subject (recipient_near_case_subject); its reason says '{{hops}} hops from {{subject}}', names {{case_id}} and {{chain}}, and cites 31 U.S.C. 5318(g)(2). On Decide for freeze_account or file_sar: never the case owner (caller_owns_case), and never anyone with a path to the subject within 3 hops (caller_linked_to_subject), a reason that says '{{hops}} hops from {{subject}}', names {{chain}} and calls it a conflict of interest."
   ],
   "toolkit": "Bank",
   "rules": [

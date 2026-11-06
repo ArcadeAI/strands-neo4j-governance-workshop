@@ -3,7 +3,7 @@
     "The payments exceptions desk. A release is the one irreversible step, so it is the one the graph is asked about.",
     "The sanctions list in the seed is synthetic. A beneficiary three ownership or control hops from a listed entity matches no name on the list; the graph still sees it. A hold here is a risk-based review, stricter than the OFAC 50 Percent Rule on purpose.",
     "Structuring counts what the beneficiary has already received, which only the transfer graph knows: no single payment in the pattern looks wrong.",
-    "TODO(module 02): two pre rules on ReleasePayment, both escalating release_payment on payment_id to a sanctions officer: one when the beneficiary is within 3 hops of a listed entity (beneficiary_near_sanctioned), one when the payment would extend a structuring pattern (structuring: floor 8000, threshold 10000, window_days 14, min_count 4). The reason is what the agent reads: make it say what to call next."
+    "TODO(module 02): two pre rules on ReleasePayment, both escalating release_payment on payment_id to a sanctions officer: one when the beneficiary is within 3 hops of a listed entity (beneficiary_near_sanctioned), one when the payment would extend a structuring pattern (structuring: floor 8000, threshold 10000, window_days 14, min_count 4). The reason is what the agent reads: make it say what to call next. The tests read it too: the sanctions reason says '{{hops}} hops from {{listed}} ({{entry}})' and names {{chain}}; the structuring reason says 'structuring', '{{senders}} different senders' and {{beneficiary}}."
   ],
   "toolkit": "Bank",
   "rules": [

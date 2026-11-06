@@ -7,7 +7,7 @@ You leave with a Strands agent on Amazon Bedrock or Anthropic, answering from yo
 ## What you build
 
 1. Put the exercise in place: `make start M=01`. It replaces two files with versions that have `TODO(module 01)` in them, and backs up what was there.
-2. **A local tool** (`agent/bank_agent/local_tools.py`). `fx_convert` is already a `@tool` with a docstring; Strands builds the tool's schema from the type hints and the `Args:` section, and the docstring is all the model knows about it. Write its body: convert through the synthetic `USD_PER` rates, accept lower-case codes, and raise a `ValueError` that names an unknown code. A tool that raises comes back to the model as an error result, which it can read and recover from.
+2. **A local tool** (`agent/bank_agent/local_tools.py`). `fx_convert` is already a `@tool` with a docstring; Strands builds the tool's schema from the type hints and the `Args:` section, and the docstring is all the model knows about it. Write its body: convert through the synthetic `USD_PER` rates, accept lower-case codes, and raise `ValueError("No reference rate for <CODE>")` for an unknown code (the check looks for that wording). A tool that raises comes back to the model as an error result, which it can read and recover from.
 3. **The agent's tools** (`agent/bank_agent/agent.py`). In `build_agent`, give the agent `fx_convert` and, when the Arcade toolbox is connected, every tool it lists for this employee. With no `ARCADE_API_KEY` there is no toolbox, and the agent says the bank is not connected.
 4. Check it: `make check M=01`.
 5. Give it a model. In `.env`, either:
@@ -19,7 +19,7 @@ You leave with a Strands agent on Amazon Bedrock or Anthropic, answering from yo
 
        uv run ask "A supplier invoice is 2,500 EUR. What is that in dollars?"
 
-   The transcript shows `> fx_convert {...}` and the answer uses its result.
+   The transcript shows `> fx_convert {...}` and the answer uses its result. With no model configured, the scripted assistant does not call tools: it only says the bank is not connected, so this step needs a model.
 6. Ask it to release a payment. It cannot: it has no tool that reaches the bank, and says so.
 
 ## What to look at

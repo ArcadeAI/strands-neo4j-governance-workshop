@@ -24,9 +24,9 @@ CASE-7001, planted in the graph: Victor Hale, a former deputy mayor (a PEP), mov
 
 - **The team** (`agent/bank_agent/desks/aml.py`). `build_team`: a `Swarm` of the three investigators that starts with the funds tracer, bounded by `max_handoffs`, `max_iterations`, `execution_timeout` and `node_timeout`. `build_graph`: the Swarm is the node `investigation`, the lead is `lead`, one edge between them, and the investigation is the entry point. A Swarm is a valid Graph node because both are Strands `MultiAgentBase`.
 - **The case-team controls** (`gate/policies/03-aml.json`). Three pre rules:
-  - `pre.no-tipping-off` on `Gmail.SendEmail` and `Slack.SendDmToUser`: `recipient_near_case_subject: 2`, refused when the recipient is within two hops of the subject of an open case. It is checked on the recipient, so it holds whoever sends and through whichever app.
+  - `pre.no-tipping-off` on `Gmail.SendEmail` and `Slack.SendDmToUser`: `recipient_near_case_subject: 2`, refused when the recipient is within two hops of the subject of an open case. The tests expect its reason to say `{{hops}} hops from {{subject}}`, name `{{case_id}}` and `{{chain}}`, and cite `31 U.S.C. 5318(g)(2)`. It is checked on the recipient, so it holds whoever sends and through whichever app.
   - `pre.decide-not-the-case-owner` on `Decide`, for `freeze_account` and `file_sar`: `caller_owns_case: true`.
-  - `pre.decide-without-a-link-to-the-subject` on the same: `caller_linked_to_subject: 3`, refused when the approver has a path to the subject within three hops. The graph is the conflict-of-interest register.
+  - `pre.decide-without-a-link-to-the-subject` on the same: `caller_linked_to_subject: 3`, refused when the approver has a path to the subject within three hops; its reason says `{{hops}} hops from {{subject}}`, names `{{chain}}`, and calls it a `conflict of interest`. The graph is the conflict-of-interest register.
 
   Four eyes itself (`pre.freeze-needs-four-eyes`, `pre.sar-needs-four-eyes`) and PII masking (`post.mask-pii`) are already in the file: read them.
 

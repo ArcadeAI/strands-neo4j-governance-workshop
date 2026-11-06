@@ -31,7 +31,7 @@ def _settings(user: str | None, desk: str = "assistant") -> Settings:
 
 def _engine(settings: Settings) -> ArcadeEngine:
     if not settings.arcade_api_key:
-        sys.exit("ARCADE_API_KEY is not set. Copy .env.example to .env and fill it in (docs/modules/00-setup.md).")
+        sys.exit("ARCADE_API_KEY is not set. Copy .env.example to .env and fill it in (docs/modules/02-payments.md, step 4).")
     return ArcadeEngine.connect(settings.arcade_api_key, settings.arcade_base_url)
 
 
