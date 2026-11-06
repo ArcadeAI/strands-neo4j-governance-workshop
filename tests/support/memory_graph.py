@@ -308,6 +308,8 @@ class MemoryBook:
         owned_by = [{"party_id": chain[0], "name": name(chain[0]), "list_entry": self.graph.parties[chain[0]].get("list_entry"),
                      "pep": self.graph.parties[chain[0]].get("pep"), "pcts": pcts, "chain": [name(k) for k in chain]}
                     for chain, pcts in self._owner_paths(party_id, down=False)]
+        owns.sort(key=lambda row: (len(row["chain"]), row["chain"]))
+        owned_by.sort(key=lambda row: (len(row["chain"]), row["chain"]))
         return {
             "party_id": p["id"], "name": p["name"], "kind": p["kind"], "pep": p.get("pep"), "list_entry": p.get("list_entry"),
             "owns": owns, "owned_by": owned_by,

@@ -143,12 +143,14 @@ OWNS_DOWN = """
 MATCH path = (:Party {id: $party_id})-[:OWNS*1..4]->(c:Company)
 RETURN c.id AS company_id, c.name AS name, c.list_entry AS list_entry,
        [r IN relationships(path) | r.pct] AS pcts, [n IN nodes(path) | n.name] AS chain
+ORDER BY length(path), chain
 """
 
 OWNED_BY = """
 MATCH path = (o:Party)-[:OWNS*1..4]->(:Party {id: $party_id})
 RETURN o.id AS party_id, o.name AS name, o.list_entry AS list_entry, o.pep AS pep,
        [r IN relationships(path) | r.pct] AS pcts, [n IN nodes(path) | n.name] AS chain
+ORDER BY length(path), chain
 """
 
 DIRECTORSHIPS = """
