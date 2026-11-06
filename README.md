@@ -1,28 +1,34 @@
-# Strands Agents Loan Desk with Arcade and Neo4j
+# Larkspur Bank: governed Strands agents on a Neo4j graph, with Arcade
 
-A hands-on workshop: build a loan desk agent with [Strands Agents](https://strandsagents.com), give it a loan book that lives in a [Neo4j](https://neo4j.com) graph, and govern every tool call it makes with [Arcade](https://arcade.dev), so its limits hold however the prompt is worded.
+A hands-on workshop. You build three agent desks at one synthetic bank with [Strands Agents](https://strandsagents.com), give them one bank that lives in a [Neo4j](https://neo4j.com) graph, and govern every tool call they make with [Arcade](https://arcade.dev), so the bank's controls hold however the prompt is worded.
 
-A loan officer asks the agent, in plain language, to approve a $95K loan for a second bakery location. The agent searches the loan book, reads the file and calls the approval tool as her. Arcade sends that call to this repo's control plane before it runs, and the control plane refuses it: $95K is over her $50K approval authority. The refusal tells the agent how to escalate. The request lands with the one approver with enough authority, he approves it from his own terminal, and her retry goes through, once. A $32K loan she *could* approve on its own is refused too, because the graph shows its owner's other businesses already carry approved exposure. Every decision is a line in the gate's audit log.
+The three desks share one graph, and each control asks it a question no name list or role table can answer:
+
+- **Payments exceptions.** A Strands Graph screens a $48,500 payment and routes it on the verdict. The beneficiary, Brightwater Trading, matches no name on the sanctions list, so the screener clears it. The release is held anyway: Arcade's pre hook walks the graph and finds Brightwater's owner sits on the board of Orlov Maritime, a listed entity three hops away. A $9,750 payment is held because the graph counts five earlier payments just under $10,000 into the same account in two weeks. Both go to a sanctions officer the agent cannot choose.
+- **AML case team.** A Swarm of investigators (funds tracer, ownership tracer, sanctions and PEP screener) sits inside a Graph with a lead. It traces money round three mule accounts and back to Victor Hale. The lead tries to email Rita, the relationship manager for Hale's holding company, and is refused: Rita is two hops from the subject of an open case, and telling her could tip him off. A freeze needs a second person, who must be a BSA officer, must not own the case, and must have no path to Hale in the graph. Marco is a BSA officer and sits on the board of Hale's shell company, so the request goes past him to Dana. SSNs and account numbers are masked before any model reads them.
+- **Banker copilot.** A coordinator calls a research agent and a deal agent as tools. Ian, on the public side, never gets the deal agent: the access hook removes it, and the company profile he reads has Project Falcon (Northwind buying Lakeside) masked. The control room approves a time-limited wall-crossing, stored as a `WALL_CROSSED` edge with an expiry, and only Falcon opens.
+
+Every decision is a line in the control plane's audit log, and nothing in any agent's instructions states a rule (a test checks).
 
 ## Why we built this
 
-An agent that writes to a real business system needs limits the model cannot reason around. The thesis is one sentence: **treat the LLM as an adversary, and put the controls somewhere it cannot reason around.**
+An agent that acts in a regulated business needs controls the model cannot reason around. The thesis is one sentence: **treat the LLM as an adversary, and put the controls somewhere it cannot reason around.**
 
-A limit written into a system prompt is a suggestion. So the agent's instructions carry no limits at all (a test keeps it that way), and every control lives outside the model: in hooks Arcade calls on every tool call, keyed on who the call is for, reading who that person is from the graph. The model never gets a vote.
+Banking controls are mostly about relationships: who owns whom, who sits on which board, who has received what from whom, who knows about which deal. Those are graph questions, so the bank's records live in Neo4j. The controls live in hooks Arcade calls on every tool call, keyed on who the call is for, asking the graph before the tool runs. The agents are Strands multi-agent patterns (Graph, Swarm, agents as tools), and the controls hold across every agent in them, because they sit outside all of them.
 
 ## The workshop
 
 | Time | Module | You end with |
 |---|---|---|
 | 9:00 to 9:15 | [00 Welcome and setup](./docs/modules/00-setup.md) | The repo installed, the tests green, a Neo4j database and an Arcade project ready. |
-| 9:15 to 9:45 | [01 Build a Strands agent](./docs/modules/01-build.md) | A Strands agent on Bedrock or Anthropic with a local tool, answering from the terminal. |
-| 9:45 to 10:30 | [02 Connect: Arcade, Neo4j and just-in-time auth](./docs/modules/02-connect.md) | The loan graph seeded, the Loan Desk MCP server deployed to Arcade, the agent calling it as Alice, and Slack authorized at first use. |
-| 10:30 to 10:45 | Break | |
-| 10:45 to 11:30 | [03 Govern: policy hooks and a human in the loop](./docs/modules/03-govern.md) | The control plane registered with Arcade: a refusal, an escalation, Charlie's approval, a single-use retry, redaction and a stripped prompt injection. |
-| 11:30 to 12:30 | [04 Observe, evaluate, and go to production](./docs/modules/04-ship.md) | Traces, an eval suite that catches what policy cannot, and the production checklist. |
-| 12:30 to 1:00 | [05 Q&A and wrap-up](./docs/modules/05-wrap-up.md) | The whole story once more, end to end, and what you take home. |
+| 9:15 to 9:35 | [01 Build a Strands agent](./docs/modules/01-build.md) | A Strands agent on Bedrock or Anthropic with a local tool, answering from the terminal. |
+| 9:35 to 10:30 | [02 The payments exceptions desk](./docs/modules/02-payments.md) | The bank seeded, the Bank tools deployed to Arcade, the control plane registered, and a Graph whose release is held by a three-hop sanctions check and a structuring count. |
+| 10:30 to 10:40 | Break | |
+| 10:40 to 11:35 | [03 The AML case team](./docs/modules/03-aml.md) | A Swarm inside a Graph, a tipping-off block on Gmail, four eyes on a freeze with a conflict check in the graph, and PII masked. |
+| 11:35 to 12:30 | [04 The banker copilot, and evals](./docs/modules/04-banker.md) | Agents as tools behind an information barrier, an expiring wall-crossing, and evals that catch what policy cannot name. |
+| 12:30 to 1:00 | [05 Production and wrap-up](./docs/modules/05-wrap-up.md) | The production checklist, how this compares with AgentCore Policy, and Q&A. |
 
-Modules 01 to 04 each have a hands-on exercise. `make start M=01` puts that module's TODOs in place, `make check M=01` runs its tests, and `make solve M=01` puts the solution in if you fall behind. The repository as cloned is the solved state, so every module also runs without doing the exercise.
+Modules 01 to 04 each have a hands-on exercise. `make start M=02` puts that module's TODOs in place, `make check M=02` runs its tests, and `make solve M=02` puts the solution in if you fall behind. The repository as cloned is the solved state, so every module also runs without doing the exercise. `make verify-modules` proves every starter fails its check and every solution passes it.
 
 ## Prerequisites
 
@@ -30,63 +36,63 @@ Modules 01 to 04 each have a hands-on exercise. `make start M=01` puts that modu
 - **A model**, one of:
   - **Amazon Bedrock** (the Strands default): an AWS account with Bedrock access to an Anthropic Claude model in your region, and credentials in your usual chain (`aws configure`, `aws sso login`, or `AWS_PROFILE`). Set `MODEL_PROVIDER=bedrock` and `AWS_REGION`.
   - **Anthropic**: an API key. Set `ANTHROPIC_API_KEY` (and `MODEL_PROVIDER=anthropic`, or leave it empty).
-  - Neither, to start: the agent runs on a scripted model with no key until you give it one.
+  - Neither, to start: every desk runs on scripted models with no key until you give it one.
 - **An [Arcade](https://api.arcade.dev/dashboard) account**, a project, a project API key, and the Arcade CLI: `uv tool install arcade-mcp`, then `arcade login` ([CLI reference](https://docs.arcade.dev/en/references/arcade-cli)).
 - **Neo4j**, one of:
-  - **[Neo4j Aura Free](https://console.neo4j.io)** (recommended): reachable from Arcade's cloud, where the deployed Loan Desk tools run.
-  - **Docker**: `make neo4j-up` starts Neo4j 5.26 Community on your laptop. The deployed tools then need a TCP tunnel to reach it ([02-connect](./docs/modules/02-connect.md)).
+  - **[Neo4j Aura Free](https://console.neo4j.io)** (recommended): reachable from Arcade's cloud, where the deployed Bank tools run.
+  - **Docker**: `make neo4j-up` starts Neo4j 5.26 Community on your laptop. The deployed tools then need a TCP tunnel to reach it ([module 02](./docs/modules/02-payments.md)).
 - **[ngrok](https://ngrok.com)** (free account), so Arcade can call the control plane on your laptop.
-- **Optional, a Slack workspace** you can authorize, for the "tell Charlie" step.
+- **Optional, a Gmail account** you can authorize, for the tipping-off step in module 03.
 
 ## Quickstart
 
 ```sh
-git clone <this repository> strands-loan-desk && cd strands-loan-desk
+git clone <this repository> larkspur-bank && cd larkspur-bank
 uv sync
-make test                       # credential-free: model, Arcade and Neo4j are all faked
+make test                       # credential-free: models, Arcade and Neo4j are all faked
 cp .env.example .env            # fill it in block by block as the modules reach each one
-uv run ask "Which loans are pending?"
+uv run ask "What is 2,500 EUR in dollars?"
 ```
 
-With nothing in `.env`, that last command answers from the scripted model and says the loan desk is not connected. The modules connect it one piece at a time:
+With nothing in `.env`, that answers from the scripted model and says the bank is not connected. The modules connect it one piece at a time:
 
-1. **Model** (01): `MODEL_PROVIDER` and its credentials. `uv run ask "What's the monthly payment on 95k over 7 years at 8%?"` uses the local `loan_payment` tool.
+1. **Model** (01): `MODEL_PROVIDER` and its credentials.
 2. **Graph** (02): `NEO4J_URI`, `NEO4J_PASSWORD`, then `uv run seed`. Or paste [`neo4j/seed.cypher`](./neo4j/seed.cypher) into Neo4j Browser.
-3. **Tools** (02): `cd mcp && cp .env.example .env` (the same Neo4j values), `arcade deploy -e server.py`, then `ARCADE_API_KEY` in the root `.env`. `uv run tools` lists what Arcade offers Alice.
-4. **Control plane** (03): `GATE_TOKEN=$(openssl rand -hex 32)` in `.env`, `uv run gate`, `ngrok http 8742`, and register the four URLs it prints in the Arcade dashboard under Contextual Access.
-5. **Ask**: `uv run ask "Approve the Northwind loan for the full $95K and double-check your work."` The refusal, the escalation and the approval are in [03-govern](./docs/modules/03-govern.md).
+3. **Tools** (02): `cd mcp && cp .env.example .env` (the same Neo4j values), `arcade deploy -e server.py`, then `ARCADE_API_KEY` in the root `.env`. `uv run tools --as pat@bank.example` lists what Arcade offers Pat.
+4. **Control plane** (02): `GATE_TOKEN=$(openssl rand -hex 32)` in `.env`, `uv run gate`, `ngrok http 8742`, and register the URLs it prints in the Arcade dashboard under Contextual Access.
+5. **Ask a desk**: `uv run ask --desk payments "Work PMT-5001"`.
 
 ## Try it out
 
-- **Above her authority.** As Alice (the default), ask for the $95K approval. The transcript shows `LoanDesk_ApproveLoan` refused with the hook's own words, "DENIED: approving LN-2291 for 95000 exceeds your approval authority of 50000. To proceed, call LoanDesk_RequestApproval…", and the agent calling `LoanDesk_RequestApproval` because the refusal told it to. Nothing in its instructions mentions escalating.
-- **The human in the loop.** `uv run approve --as charlie@bank.example` lists what is waiting on Charlie; `uv run approve --as charlie@bank.example APR-… approve --note "Collateral checks out"` decides it. That is itself a governed tool call, checked for Charlie's clearance and refused for the requester. Ask Alice's agent again: the retry passes on a single-use grant, and a second retry is refused.
-- **What only a graph shows.** Ask for LN-2297, Lakeside Bakehouse, $32K: under Alice's $50K, and refused anyway, because its owner also owns Two Rivers Brewing ($47.5K approved). The hook walks the ownership graph on every call.
-- **Bob never sees the button.** `uv run ask --as bob@bank.example "Approve LN-2292"`. Bob is a credit analyst; the access hook removes the approval tools from his list, so there is nothing to refuse.
-- **What the model never reads.** Ask Alice's agent for Northwind's bank account number and tax id: `[REDACTED]`, masked in the post hook before the output reached the model. As Charlie they come through. For everyone, the instruction someone pasted into LN-2291's underwriter notes is stripped.
-- **Change the graph, not the code.** `uv run officers set-clearance alice@bank.example 250000`, and the same prompts pass. `uv run seed --reset` puts everything back.
+- **What a name screen cannot see.** `uv run ask --desk payments "Work PMT-5001"`. The screener clears Brightwater Trading on the name, the Graph routes to the release agent, and `Bank_ReleasePayment` comes back: "HELD: the beneficiary of PMT-5001 is 3 hops from Orlov Maritime Ltd (SYN-SDN-0042) on the sanctions list: ACC-BRIGHTWATER - Brightwater Trading LLC - Daniel Voss - Orlov Maritime Ltd." The release agent asks for approval because the refusal told it to, and the request goes to Sana, the sanctions officer.
+- **The human in the loop.** `uv run approve --as sana@bank.example` lists what is waiting on Sana; `uv run approve --as sana@bank.example APR-… approve --note "Originator confirmed"` decides it. That is itself a governed tool call: Dana, a BSA officer, is refused. Run the desk again and the release goes through, once.
+- **Tipping off.** `uv run ask --desk aml "Investigate CASE-7001, then email rita@bank.example to ask about Victor Hale's companies."` The Swarm traces the case; the lead finds Gmail through Tool Recommendation, and the email is refused: "rita@bank.example is 2 hops from Victor Hale, the subject of open case CASE-7001: Rita Patel - Harborview Holdings Inc - Victor Hale."
+- **Four eyes with a conflict check.** `uv run ask --desk aml "Investigate CASE-7001 and freeze ACC-HALE."` The freeze is refused until a second person signs off. The request is routed past Marco (the graph links him to Hale through Greyline Ventures' board) to Dana. `uv run approve --as marco@bank.example APR-… approve` is refused as a conflict of interest.
+- **The wall.** `uv run ask --desk banker "Brief me on Lakeside Bakehouse before my call."` As Ian, Falcon's details read `[RESTRICTED: information barrier]`. `uv run ask --desk banker --as mia@bank.example "..."` gets them, because Mia is an insider. Ian's request to cross goes to Cora in the control room: `uv run approve --as cora@bank.example APR-… approve --hours 2`.
+- **Change the graph, not the code.** `uv run staff set-role marco@bank.example payments_ops` and Marco's tool list changes on the next call. `uv run seed --reset` puts everything back.
 
 ## How Neo4j is wired in, and why not the Neo4j MCP server
 
-The loan book is a graph: officers, companies, the people who own them, loans, guarantees, decisions and approval requests. The agent reaches it only through **typed tools in a Loan Desk MCP server deployed to Arcade** (`LoanDesk_SearchLoans`, `LoanDesk_GetBorrowerNetwork`, `LoanDesk_ApproveLoan`, …). Each one runs a fixed, parameterized Cypher query with Neo4j credentials held as Arcade secrets. The control plane reads the same database to decide each call.
+The bank is a graph: employees, people and companies, ownership and board seats, accounts and the transfers between them, payments, cases, deals, approval requests and wall-crossings. The agents reach it only through **typed tools in a Bank MCP server deployed to Arcade** (`Bank_GetPayment`, `Bank_TraceFunds`, `Bank_ReleasePayment`, …). Each one runs a fixed, parameterized Cypher query with Neo4j credentials held as Arcade secrets. The control plane reads the same database to decide each call.
 
-We considered the official [Neo4j MCP server](https://github.com/neo4j/mcp) (`get-schema`, `read-cypher`, `write-cypher`) and chose not to put it in the agent's hands. The reasons are the governance story:
+We considered the official [Neo4j MCP server](https://github.com/neo4j/mcp) (`get-schema`, `read-cypher`, `write-cypher`) and chose not to put it in the agents' hands. The reasons are the governance story:
 
-1. **A policy needs arguments it can read.** "Approve no more than your clearance" is a check on `ApproveLoan(loan_id, amount)`. On `write-cypher(query)` the amount is somewhere inside a string the model wrote, and a policy that has to parse Cypher to find it has already lost.
-2. **The model should not write the business logic.** With free-form Cypher, the model decides what "approve" means. With a typed tool, the bank does, once, in reviewed code.
+1. **A policy needs arguments it can read.** "Hold a release near a listed entity" is a check on `ReleasePayment(payment_id)`. On `write-cypher(query)` the payment is somewhere inside a string the model wrote, and a policy that has to parse Cypher to find it has already lost.
+2. **The model should not write the business logic.** With free-form Cypher, the model decides what "release" means. With a typed tool, the bank does, once, in reviewed code.
 3. **Credentials stay out of the agent.** The deployed tools read their Neo4j secrets from Arcade at call time; the agent and the laptop never hold a database password.
 
-The Neo4j MCP server is still a good tool for a person exploring the graph read-only, from Claude Desktop or Neo4j's own tooling. Module 02 uses Neo4j Browser for that.
+The Neo4j MCP server is still a good tool for a person exploring the graph read-only. Module 02 uses Neo4j Browser for that.
 
 ## Compared with the LangChain workshop
 
-This is the Strands Agents and Neo4j counterpart of Arcade's [deep-agents-governance](https://github.com/ArcadeAI/deep-agents-governance) workshop. It follows that workshop's agenda, loan desk, cast (Alice, Bob, Charlie, Michael) and control points. What changes:
+Arcade's [deep-agents-governance](https://github.com/ArcadeAI/deep-agents-governance) workshop governs one LangChain Deep Agent on a loan desk. This workshop keeps its skeleton (timed modules, governance through Arcade's hooks, a human in the loop, evals, credential-free tests) and changes the scenario so that Strands and Neo4j are the reason it exists:
 
 | | LangChain workshop | This workshop |
 |---|---|---|
-| Agent | LangChain Deep Agent on Managed Deep Agents, `ArcadeMiddleware` | Strands `Agent`, an Arcade toolbox in [`arcade_tools.py`](./agent/loan_agent/arcade_tools.py) |
-| Model | the room's model key | Amazon Bedrock or Anthropic, or scripted |
+| Scenario | one loan desk | three desks at one bank, on one graph |
+| Agent | one Deep Agent, `ArcadeMiddleware` | Strands Graph, Swarm inside a Graph, agents as tools; an Arcade toolbox in [`arcade_tools.py`](./agent/bank_agent/arcade_tools.py) |
+| What a policy checks | amounts against a clearance | paths in a graph: hops to a listed entity, transfer counts, links to a case subject, who is over a wall |
 | System of record | a loan REST API with SQLite | a Neo4j graph, reached through typed tools |
-| Identity | Okta sign-in, the ID token's email | a persona (`--as`), with the production path in [`docs/production.md`](./docs/production.md) |
 | Approver's side | an approval web page | `uv run approve`, the same governed tool call with no model in it |
 | Observe | LangSmith | OpenTelemetry from Strands, and Strands Evals |
 
@@ -94,28 +100,30 @@ This is the Strands Agents and Neo4j counterpart of Arcade's [deep-agents-govern
 
 | Path | What it is |
 |---|---|
-| [`agent/`](./agent/README.md) | The Strands agent (`loan_agent`): model choice, Arcade toolbox, CLI, evals, an optional AgentCore entrypoint. |
-| [`mcp/`](./mcp/README.md) | The Loan Desk MCP server, deployed to Arcade with `arcade deploy`: eight typed tools over Neo4j. |
-| [`gate/`](./gate/README.md) | The control plane: [`policy.json`](./gate/policy.json) and the access, pre and post hooks Arcade calls. |
+| [`agent/`](./agent/README.md) | The Strands agents (`bank_agent`): the assistant, the three desks, the Arcade toolbox, CLI, evals, an optional AgentCore entrypoint. |
+| [`mcp/`](./mcp/README.md) | The Bank MCP server, deployed to Arcade with `arcade deploy`: seventeen typed tools over Neo4j. |
+| [`gate/`](./gate/README.md) | The control plane: [`policies/`](./gate/policies) and the access, pre and post hooks Arcade calls. |
 | [`neo4j/`](./neo4j/README.md) | The graph's seed data, the loader, and the paste-able `seed.cypher`. |
 | [`modules/`](./modules) | Each hands-on module's `starter/` and `solution/` files. |
-| [`docs/`](./docs/architecture.md) | One page per module, plus architecture, production and FAQ. |
+| [`docs/`](./docs/architecture.md) | One page per module, plus architecture, production, FAQ and [bold bets](./docs/bold-bets.md) for a finale. |
 | [`tests/`](./tests) | The credential-free suite, and an optional live Neo4j contract test. |
 
 ## Tests
 
 ```sh
-make test          # or: uv run pytest -q
-make check M=03    # one module's tests
+make test              # or: uv run pytest -q
+make check M=03        # one module's tests
+make verify-modules    # every starter fails its check, every solution passes
 ```
 
-The suite needs no credentials and no network. It replaces the model with a scripted Strands model, Arcade with a fake Engine that calls the real control plane over HTTP and runs the real Loan Desk tool functions, and Neo4j with an in-memory graph loaded from the same seed. It refuses to read `.env`. With a Neo4j you can wipe, `NEO4J_TEST_URI=bolt://localhost:7687 NEO4J_TEST_PASSWORD=… uv run pytest tests/test_neo4j_live.py` runs the Cypher itself against the database.
+The suite needs no credentials and no network. It replaces each model with a scripted Strands model, Arcade with a fake Engine that calls the real control plane over HTTP and runs the real Bank tool functions, and Neo4j with an in-memory graph loaded from the same seed. It refuses to read `.env`. With a Neo4j you can wipe, `NEO4J_TEST_URI=bolt://localhost:7687 NEO4J_TEST_PASSWORD=… uv run pytest tests/test_neo4j_live.py` runs every Cypher query against the database and holds it to the in-memory graph's answers.
 
 ## Further reading
 
-- [`docs/architecture.md`](./docs/architecture.md): the control points, who each call runs as, and what lives where.
-- [`docs/production.md`](./docs/production.md): what changes between the laptop and production: identity, hosting the gate, Neo4j, AgentCore.
-- [`docs/faq.md`](./docs/faq.md): why the limits live in hooks, why not Strands hooks or Bedrock Guardrails for policy, why typed tools over the Neo4j MCP server, using another model.
+- [`docs/architecture.md`](./docs/architecture.md): the control points, who each call runs as, the graph, and what lives where.
+- [`docs/production.md`](./docs/production.md): what changes between the laptop and production, and how this compares with AgentCore Policy.
+- [`docs/faq.md`](./docs/faq.md): why the controls live in hooks, why not Strands hooks or Bedrock Guardrails, why typed tools over the Neo4j MCP server.
+- [`docs/bold-bets.md`](./docs/bold-bets.md): ideas for a finale or stretch module.
 - [`gate/README.md`](./gate/README.md): the policy vocabulary and the hook contract.
 
 ## License
