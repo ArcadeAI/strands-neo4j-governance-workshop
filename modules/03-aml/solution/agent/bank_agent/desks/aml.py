@@ -18,6 +18,7 @@ hops from the subject is refused as tipping off.
 
 from __future__ import annotations
 
+import re
 from collections.abc import Sequence
 from typing import Any
 
@@ -218,7 +219,8 @@ def lead_script(messages: Sequence[dict[str, Any]], _tools: list[str]) -> Move:
     if not history:
         return Call("Bank_GetCase", {"case_id": case_id})
     case = payload(history[0]) or {}
-    findings = " ".join((find(messages, r"Inputs from previous nodes:([\s\S]*)") or "").split())[:800]
+    handed_over = " ".join(b.get("text", "") for b in messages[0].get("content", [])) if messages else ""
+    findings = " ".join(re.findall(r"- Agent: ([^\n]+)", handed_over))[:800]
     queue = lead_plan(task, case, case_id)
     for i, step in enumerate(history[1:], start=1):
         if queue and step.name == queue[0].name:
@@ -229,4 +231,6 @@ def lead_script(messages: Sequence[dict[str, Any]], _tools: list[str]) -> Move:
     if queue:
         return queue[0]
     done = [summary(step) for step in history[1:]]
-    return Say("\n".join([f"Team findings: {findings}" if findings else "", *done]).strip() or f"Nothing to do on {case_id}.")
+    found = [f"- {line.strip()}" for line in re.findall(r"- Agent: ([^\n]+)", handed_over)]
+    lines = ["Team findings:", *found, "", "Actions:", *done] if found else done
+    return Say("\n".join(lines).strip() or f"Nothing to do on {case_id}.")
