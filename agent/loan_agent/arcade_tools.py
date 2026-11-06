@@ -1,4 +1,4 @@
-"""Arcade tools for a Strands agent: the counterpart of LangChain's `ArcadeMiddleware`.
+"""Arcade tools for a Strands agent.
 
 The agent lists no loan desk tools in code. Every run starts with:
 

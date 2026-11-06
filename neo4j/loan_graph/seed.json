@@ -1,7 +1,7 @@
 {
   "//": [
     "The loan desk graph, the one source of truth for `uv run seed`, `neo4j/seed.cypher` and the in-memory graph the tests use.",
-    "The eight applications LN-2288 to LN-2299 are the same borrowers, amounts and statuses as Arcade's LangChain loan desk workshop, so the story carries over. LN-2297 is new here: a small loan whose ownership group already carries approved exposure, which only a graph shows.",
+    "The eight applications LN-2288 to LN-2299 are the same borrowers, amounts and statuses as Arcade's original loan desk workshop (see the README), so the story carries over. LN-2297 is new here: a small loan whose ownership group already carries approved exposure, which only a graph shows.",
     "LN-2291's underwriter_notes ends in an instruction aimed at whatever model reads the record. The note is data, not configuration: it is written the way a real note with a poisoned paste in it would look.",
     "Every address uses the reserved .example domain and every account number and tax id is synthetic."
   ],
