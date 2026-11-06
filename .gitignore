@@ -8,6 +8,7 @@ __pycache__/
 .ruff_cache/
 .gate/
 .sessions/
+.workshop/
 dist/
 build/
 *.egg-info/
